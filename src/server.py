@@ -32,15 +32,20 @@ logger = logging.getLogger(__name__)
 config = Config()
 
 # 然后处理路径
-if getattr(sys, 'frozen', False):
-    # 如果是打包后的exe运行
-    BASE_DIR = sys._MEIPASS
-    # 数据目录应该在exe所在目录
-    DATA_ROOT = os.path.dirname(sys.executable)
-    # 确保使用正确的路径分隔符
-    DATA_ROOT = os.path.normpath(DATA_ROOT)
+if os.environ.get('VERCEL_ENV'):
+    # Vercel 环境下使用 /tmp 目录
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    DATA_ROOT = '/tmp'
     
     # 修改下载器的保存路径
+    config.save_path = os.path.join(DATA_ROOT, 'novel_downloads')
+    config.bookstore_dir = os.path.join(DATA_ROOT, 'data', 'bookstore')
+elif getattr(sys, 'frozen', False):
+    # 如果是打包后的exe运行
+    BASE_DIR = sys._MEIPASS
+    DATA_ROOT = os.path.dirname(sys.executable)
+    DATA_ROOT = os.path.normpath(DATA_ROOT)
+    
     config.save_path = os.path.join(DATA_ROOT, 'novel_downloads')
     config.bookstore_dir = os.path.join(DATA_ROOT, 'data', 'bookstore')
 else:
@@ -48,7 +53,6 @@ else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     DATA_ROOT = BASE_DIR
     
-    # 使用默认的保存路径
     config.save_path = os.path.join(DATA_ROOT, 'novel_downloads')
     config.bookstore_dir = os.path.join(DATA_ROOT, 'data', 'bookstore')
 
